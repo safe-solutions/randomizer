@@ -2,7 +2,8 @@
 class Randomizer
 {
 	private $__text;
-	private $__dir;
+	private $__match_id;
+	private $__replaces;
 	
 	public static function get_instance()
 	{
@@ -15,13 +16,15 @@ class Randomizer
 		return $this;
 	}
 	
-	public function dir($dir)
-	{
-		$this->__dir = $dir;
-	}
-	
 	public function make()
 	{
+		$this->__match_id = 0;
+		$this->__replaces = array();
+		$this->__text = preg_replace_callback('|raw\[(.*)\]|U', function ($matches) {
+			$this->__replaces[] = $matches[1];
+			return 'raw[' . $this->__match_id++ . ']';
+		}, $this->__text);
+		
 		do {
 			preg_match_all('|\{([^\{\}]+)\}|U', $this->__text, $out, PREG_PATTERN_ORDER);
 			foreach ($out[1] as $t)
@@ -57,6 +60,11 @@ class Randomizer
 			}
 		}
 		while ($out[1]);
+		
+		foreach ($this->__replaces as $id=>$replace)
+		{
+			$this->__text = str_replace('raw[' . $id . ']', $replace, $this->__text);
+		}
 		
 		return $this;
 	}
