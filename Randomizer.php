@@ -21,6 +21,11 @@ class Randomizer
 		$this->__match_id = 0;
 		$this->__replaces = array();
 		$this->__text = preg_replace_callback('|raw\[(.*)\]|U', function ($matches) {
+			while (strpos($this->__text, 'raw[' . $this->__match_id . ']') !== false)
+			{
+				$this->__replaces[] = null;
+				$this->__match_id++;
+			}
 			$this->__replaces[] = $matches[1];
 			return 'raw[' . $this->__match_id++ . ']';
 		}, $this->__text);
@@ -63,6 +68,7 @@ class Randomizer
 		
 		foreach ($this->__replaces as $id=>$replace)
 		{
+			if ($replace === null) continue;
 			$this->__text = str_replace('raw[' . $id . ']', $replace, $this->__text);
 		}
 		
